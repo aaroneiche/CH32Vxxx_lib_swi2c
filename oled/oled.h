@@ -49,7 +49,7 @@ const uint8_t ssd1306_init_array[] =
         0x1F, // for 64-wide displays
         SSD1306_SETDISPLAYOFFSET,   // 0xD3
         0x00,                       // no offset
-        SSD1306_SETSTARTLINE | 0x0, // 0x40 | line
+        SSD1306_SETSTARTLINE | 0x00, // 0x40 | line
         SSD1306_CHARGEPUMP,         // 0x8D
         0x14,                       // enable?
         SSD1306_MEMORYMODE,         // 0x20
@@ -80,10 +80,10 @@ const uint8_t ssd1306_init_array[] =
 #include "lib_swi2c.h"
 
 i2c_device_t i2cDev = {
-    .pin_scl = GPIO_PC3,
-    .pin_sda = GPIO_PC4,
-    // .pin_scl = GPIO_PA2,
-    // .pin_sda = GPIO_PD6,
+    // .pin_scl = GPIO_PC3,
+    // .pin_sda = GPIO_PC4,
+    .pin_scl = GPIO_PA2,
+    .pin_sda = GPIO_PD6,
 
     // .address = 0x3C,
     .address = 0x78,
