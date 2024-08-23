@@ -16,6 +16,7 @@ i2c_device_t dev = {
 	.pin_sda = GPIO_PC4,
 
 	.address = 0xD0,
+	// .address = 0x3C,
 };
 
 uint8_t data[12];
@@ -28,6 +29,6 @@ int main()
 	swi2c_scan(&dev);
 	while (1)
 	{
-		swi2c_master_receive(&dev, 0x3B, data, 12);
+		swi2c_master_receive(&dev, 0x3B, data, 12);		
 	}
 }

@@ -3,7 +3,7 @@ TOOLKIT_DIR  := ../toolkit
 EXTRALIB_DIR := $(TOOLKIT_DIR)/extralibs
 
 # Project name
-TARGET := i2ctest
+TARGET := oled
 
 LIB_SRC := ../lib_swi2c.c
 
@@ -97,4 +97,4 @@ flash: $(TARGET).bin
 	$(MINICHLINK) -w $< flash -b
 
 clean:
-	rm $(filter-out $(TARGET).c, $(wildcard $(TARGET).*)) $(GENERATED_LD_FILE)
+	rm $(filter-out $(TARGET).c, $(TARGET).h, $(wildcard $(TARGET).*)) $(GENERATED_LD_FILE)

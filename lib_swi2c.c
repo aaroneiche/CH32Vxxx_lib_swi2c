@@ -165,14 +165,14 @@ static inline void gpio_set_rcc(const gpio_pin_t pin)
 /*** Helper Functions ********************************************************/
 // Waits for the calculated amount of time (Limits bus speed)
 // TODO:
-__attribute__((always_inline)) static inline void wait()
+__attribute__((always_inline)) static inline void wait() //Wait
 {
-
+	
 }
 
 static i2c_err_t clk_stretch(const gpio_pin_t scl)
 {
-	uint8_t clock_waits = 10;
+	int clock_waits = 10;
 	while(gpio_digital_read(scl) == GPIO_LOW)
 	{
 		if(!clock_waits--) return I2C_ERR_TIMEOUT;
@@ -255,6 +255,7 @@ i2c_err_t swi2c_master_tx_byte(i2c_device_t *i2c, uint8_t data)
 	uint8_t index = 8;
 	while(index--)
 	{
+		// printf("bit %u\n", index);
 		// Transmit one bit at a time
 		uint8_t bit = data & 0x80;
 		if(bit) { RELEASE_SDA; } else { ASSERT_SDA; }
@@ -262,6 +263,7 @@ i2c_err_t swi2c_master_tx_byte(i2c_device_t *i2c, uint8_t data)
 		wait();
 		RELEASE_SCL;   // SCL HIGH
 		wait();
+		// printf("SCL handled -- to clock stretch\n");
 		// Clock stretch, wait for SCL to go LOW
 		stat = clk_stretch(i2c->pin_scl);
 		ASSERT_SCL;    // SCL LOW
@@ -274,6 +276,7 @@ i2c_err_t swi2c_master_tx_byte(i2c_device_t *i2c, uint8_t data)
 	// Read ACK bit (0 = ACK, 1 = NACK), if Clock stretching is successful
 	if(stat == I2C_OK)
 	{
+		// printf("ackbit!\n");
 		// Release the SDA pin so the slave can set data, then release SCL
 		// to request data
 		RELEASE_SDA;
@@ -282,10 +285,15 @@ i2c_err_t swi2c_master_tx_byte(i2c_device_t *i2c, uint8_t data)
 		// Wait for clk stretch, Only read pin if it's OK
 		if(clk_stretch(i2c->pin_scl) == I2C_OK)
 		{
-			if(gpio_digital_read(i2c->pin_sda) == I2C_NACK)
-				stat = I2C_ERR_NACK;
-		}
+			// printf("reading clk for ack\n");
+			int p = gpio_digital_read(i2c->pin_sda);
+			// printf("SDA ACK: %u\n", p);
 
+			if(p == I2C_NACK){
+				stat = I2C_ERR_NACK;
+			}
+		}
+		// printf("ack result: %u\n", stat);
 		// SCL LOW for next loop
 		ASSERT_SCL;
 	}
@@ -363,9 +371,11 @@ i2c_err_t swi2c_master_transmit(i2c_device_t *i2c,
 	if( (stat = swi2c_start(i2c)) == I2C_OK && 
 		(stat = swi2c_master_tx_byte(i2c, i2c->address)) == I2C_OK)
 	{
+		// printf("first byte: %u: %02x\n", reg, *data);
 		swi2c_master_tx_byte(i2c, reg);
 		while(size)
 		{
+			// printf("current byte: %u: %02x\n",size, *data);
 			swi2c_master_tx_byte(i2c, *data);
 			++data;
 			--size;
